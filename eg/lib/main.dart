@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_social_button/flutter_social_button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const MusicPage(),
+    const MediaPage(),
     const ProfilePage(),
   ];
 
@@ -165,12 +168,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.music_note_outlined),
-                title: const Text('Music'),
+                leading: const Icon(Icons.mobile_friendly),
+                title: const Text('Media'),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
-                    _currentIndex = 1; // Navigate to Music
+                    _currentIndex = 1; // Navigate to Media
                   });
                 },
               ),
@@ -204,8 +207,8 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.home),
             ),
             BottomNavigationBarItem(
-              label: "Music",
-              icon: Icon(Icons.music_note),
+              label: "Media",
+              icon: Icon(Icons.mobile_friendly),
             ),
             BottomNavigationBarItem(
               label: "Profile",
@@ -219,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// List of Cards with size
+// List of Cards with size for grid gallery view
 List<StaggeredGridTile> _cardTile = [
   const StaggeredGridTile.count(
     crossAxisCellCount: 1,
@@ -306,9 +309,47 @@ class BackGroundTile extends StatelessWidget {
   }
 }
 
-// Music Page Widget
-class MusicPage extends StatelessWidget {
-  const MusicPage({super.key});
+// Media Page Widget
+class MediaPage extends StatelessWidget {
+  const MediaPage({super.key});
+  void _showUrlDialog(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Open Link'),
+          content: const Text('How would you like to open this link?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _launchURL(url);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Open in Browser'),
+            ),
+            TextButton(
+              onPressed: () {
+                // You can add app-specific logic here if needed
+                _launchURL(
+                    url); // For now, it opens in the browser as a fallback
+                Navigator.of(context).pop();
+              },
+              child: const Text('Open in App'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url); // Convert String to Uri
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -338,35 +379,66 @@ class MusicPage extends StatelessWidget {
         length: 5,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: [
-                Tab(icon: Icon(Icons.music_note)),
-                Tab(icon: Icon(Icons.music_video)),
-                Tab(icon: Icon(Icons.camera_alt)),
-                Tab(icon: Icon(Icons.grade)),
-                Tab(icon: Icon(Icons.email)),
+                Tab(
+                  icon: FaIcon(FontAwesomeIcons.youtube,
+                      color: Colors.red), // YouTube
+                ),
+                Tab(
+                  icon: FaIcon(FontAwesomeIcons.spotify,
+                      color: Color(0xFF1DB954)), // Spotify
+                ),
+                Tab(
+                  icon: FaIcon(FontAwesomeIcons.instagram,
+                      color: Color(0xFFE1306C)), // Instagram
+                ),
+                Tab(
+                  icon: FaIcon(FontAwesomeIcons.twitch,
+                      color: Color(0xFF9146FF)), // Twitch
+                ),
+                Tab(
+                  icon: FaIcon(FontAwesomeIcons.discord,
+                      color: Color(0xFF7289DA)), // Discord
+                ),
               ],
             ),
-            title: const Text('Music Page'),
+            title: const Text('Media Page'),
             backgroundColor: Colors.green,
           ),
-          body: const TabBarView(
+          body: TabBarView(
             children: [
-              Center(
-                  child: Icon(Icons.music_note,
-                      size: 100, color: Color.fromARGB(255, 52, 127, 189))),
-              Center(
-                  child: Icon(Icons.music_video,
-                      size: 100, color: Color.fromARGB(255, 30, 192, 103))),
-              Center(
-                  child: Icon(Icons.camera_alt,
-                      size: 100, color: Color.fromARGB(255, 173, 91, 13))),
-              Center(
-                  child: Icon(Icons.grade,
-                      size: 100, color: Color.fromARGB(255, 180, 13, 185))),
-              Center(
-                  child: Icon(Icons.email,
-                      size: 100, color: Color.fromARGB(255, 228, 59, 17))),
+              GestureDetector(
+                onTap: () => _showUrlDialog(context, 'https://www.youtube.com'),
+                child: Center(
+                    child: FaIcon(FontAwesomeIcons.youtube,
+                        size: 100, color: Colors.red)),
+              ),
+              GestureDetector(
+                onTap: () => _showUrlDialog(context, 'https://www.spotify.com'),
+                child: Center(
+                    child: FaIcon(FontAwesomeIcons.spotify,
+                        size: 100, color: Color(0xFF1DB954))),
+              ),
+              GestureDetector(
+                onTap: () =>
+                    _showUrlDialog(context, 'https://www.instagram.com'),
+                child: Center(
+                    child: FaIcon(FontAwesomeIcons.instagram,
+                        size: 100, color: Color(0xFFE1306C))),
+              ),
+              GestureDetector(
+                onTap: () => _showUrlDialog(context, 'https://www.twitch.tv'),
+                child: Center(
+                    child: FaIcon(FontAwesomeIcons.twitch,
+                        size: 100, color: Color(0xFF9146FF))),
+              ),
+              GestureDetector(
+                onTap: () => _showUrlDialog(context, 'https://discord.com'),
+                child: Center(
+                    child: FaIcon(FontAwesomeIcons.discord,
+                        size: 100, color: Color(0xFF7289DA))),
+              ),
             ],
           ),
         ),
@@ -509,21 +581,79 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
-          
           const SizedBox(height: 20),
           if (_submittedName != null && _submittedEmail != null)
             Column(
               children: [
                 Text(
-                  'Submitted Name:$_submittedName',
+                  'Submitted Name: $_submittedName',
                   style: const TextStyle(fontSize: 18),
                 ),
                 Text(
-                  'Submitted Mail ID:$_submittedEmail',
+                  'Submitted Mail ID: $_submittedEmail',
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
-            )
+            ),
+          const SizedBox(height: 20),
+          const Text(
+            'Connect with us:',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          FlutterSocialButton(
+            onTap: () {},
+          ),
+          const SizedBox(height: 2),
+          FlutterSocialButton(
+            onTap: () {},
+            buttonType: ButtonType.facebook,
+          ),
+          const SizedBox(height: 2),
+          FlutterSocialButton(
+            onTap: () {},
+            buttonType: ButtonType.google,
+            iconColor: Colors.black,
+          ),
+          FlutterSocialButton(
+            onTap: () {},
+            buttonType: ButtonType.phone,
+          ),
+          const SizedBox(height: 2),
+          FlutterSocialButton(
+            onTap: () {},
+            buttonType: ButtonType.whatsapp,
+          ),
+          const SizedBox(height: 2),
+          const Divider(
+            color: Colors.black,
+            thickness: 2.5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FlutterSocialButton(
+                onTap: () {},
+                mini: true,
+              ),
+              FlutterSocialButton(
+                onTap: () {},
+                mini: true,
+                buttonType: ButtonType.facebook,
+              ),
+              FlutterSocialButton(
+                onTap: () {},
+                mini: true,
+                buttonType: ButtonType.google,
+              ),
+              FlutterSocialButton(
+                onTap: () {},
+                mini: true,
+                buttonType: ButtonType.phone,
+              ),
+              
+            ],
+          ),
         ],
       ),
     );
